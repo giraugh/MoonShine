@@ -22,8 +22,9 @@ this works (kinda)
 
 //Compiler
 var FILETYPE = regexp.MustCompile("(\\.shine|\\.mshine)")
-var STRING1 = regexp.MustCompile("^([\\s\\S]*?)(?:\")((?:\\\\[\"]|[^\"])*)(?:\")([\\s\\S]*)$")
-var STRING2 = regexp.MustCompile("^([\\s\\S]*?)(?:')((?:\\\\[']|[^'])*)(?:')([\\s\\S]*)$")
+var STRING1 = regexp.MustCompile("^([\\s\\S]*?)(?:\")((?:\\\\[\"]|[^\"])*)(?:\")([\\s\\S]*)$") //Has s/e anchors
+var STRING2 = regexp.MustCompile("^([\\s\\S]*?)(?:')((?:\\\\[']|[^'])*)(?:')([\\s\\S]*)$") //Has s/e anchors
+var RECLAIMSTRING = regexp.MustCompile("^([\\s\\S]*?)(!STR!([0-9]+)!STR!)([\\s\\S]*)$") //Has s/e anchors
 
 //Moonshine
 var BLOCKCOMMENT = regexp.MustCompile("---((?:.|\\n)*)---")
@@ -59,23 +60,37 @@ func compile(path string) error {
 	bs, err := ioutil.ReadFile(path)
 	if err != nil {return err}
 	contents := string(bs)
-	translated := translate(contents)
+	translated, err := translate(contents)
+	if err != nil {return err}
 	err = ioutil.WriteFile(FILETYPE.ReplaceAllString(path,".moon"), []byte(translated), 0644)
 	if err != nil {fmt.Println(err)}
 	return nil
 }
 
-func translate(input string) string {
+func translate(input string) (string, error) {
 	local := input
 
 	//Hide Strings
+	local, sArr := hideStrings(local)
+
+	//Delete multiline's
+	local = BLOCKCOMMENT.ReplaceAllString(local, "")
+
+	//Show Strings
+	local, err := showStrings(local, sArr)
+	if err != nil {return "", err}
+
+	return local, nil
+}
+
+func hideStrings(input string) (string, []string) {
+	local := input
 	sArr := make([]string, 0, 0)
 	//Hide " strings
 	for {
 		if STRING1.MatchString(local) == false {break}
 		found := STRING1.ReplaceAllString(local, "$2")
 		local = STRING1.ReplaceAllString(local, "$1!STR!" + strconv.Itoa(len(sArr)) + "!STR!$3")
-		fmt.Println(found)
 		sArr = append(sArr, found)
 	}
 
@@ -86,9 +101,16 @@ func translate(input string) string {
 		local = STRING2.ReplaceAllString(local, "$1!STR!" + strconv.Itoa(len(sArr)) + "!STR!$3")
 		sArr = append(sArr, found)
 	}
+	return local, sArr
+}
 
-	//Delete multiline's
-	local = BLOCKCOMMENT.ReplaceAllString(local, "")
-
-	return local
+func showStrings(input string, sArr []string) (string, error) {
+	local := input
+	for {
+		if RECLAIMSTRING.MatchString(local) == false {break}
+		id, err := strconv.Atoi(RECLAIMSTRING.ReplaceAllString(local, "$3"))
+		if err != nil {return "", err}
+		local = RECLAIMSTRING.ReplaceAllString(local, "$1\""+sArr[id]+"\"$4")
+	}
+	return local, nil
 }

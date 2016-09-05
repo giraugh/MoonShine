@@ -1,17 +1,17 @@
 --Setup Game
-require !STR!2!STR!
+require "conf"
 game_setup!
 
 --Require Library
-require !STR!3!STR!
-require !STR!4!STR!
-require !STR!5!STR!
-require !STR!6!STR!
-require !STR!7!STR!
+require "lib.console"
+require "lib.loader"
+require "lib.math"
+require "lib.world"
+require "lib.sprites"
 
 --Dynamic requires
-ReqAll !STR!0!STR!
-ReqAll !STR!1!STR!
+ReqAll "behaviours"
+ReqAll "species"
 
 --Load Event
 love.load = ()->
