@@ -11,11 +11,11 @@ import (
 )
 
 /*
-Need to make string regex's only match first match using anchors.
-
-this works (kinda)
-^(.*?)((\")(?:\\\\[\"]|[^\"])*(\"))(.*)$
-
+is - ==
+isnt - !=
+:: - \
+? - zero operator, works like truthiness in js/coffee
+?. - existential accessor like in coffee
 
 */
 
@@ -27,8 +27,15 @@ var STRING2 = regexp.MustCompile("^([\\s\\S]*?)(?:')((?:\\\\[']|[^'])*)(?:')([\\
 var RECLAIMSTRING = regexp.MustCompile("^([\\s\\S]*?)(!STR!([0-9]+)!STR!)([\\s\\S]*)$") //Has s/e anchors
 
 //Moonshine
+var COMMENT = regexp.MustCompile("--((?:[^\\n])*)\\n")
 var BLOCKCOMMENT = regexp.MustCompile("---((?:.|\\n)*)---")
+var ISCONDITION = regexp.MustCompile("\\sis\\s")
+var ISNTCONDITION = regexp.MustCompile("\\sisnt\\s")
+var FUNCACCESSOR = regexp.MustCompile("::")
+var ZEROOP = regexp.MustCompile("((?:[a-zA-Z_]+(?:[a-zA-Z0-9_]*))|(?:\\([^)(\\n]+\\)))\\?")
+var EXISACCESSOR = regexp.MustCompile("([a-zA-Z_]+(?:[a-zA-Z0-9_.?]*))\\?\\.")
 
+//Get args and walk filepath
 func main() {
 
 	//get the file/directory from the argument
@@ -40,6 +47,7 @@ func main() {
 	}
 }
 
+//Called for each compiling file, calls translate
 func visit(path string, f os.FileInfo, err error) error {
 	if err != nil {return err}
 
@@ -56,6 +64,7 @@ func visit(path string, f os.FileInfo, err error) error {
 	return nil
 }
 
+//Reads file, translates, writes file
 func compile(path string) error {
 	bs, err := ioutil.ReadFile(path)
 	if err != nil {return err}
@@ -67,22 +76,7 @@ func compile(path string) error {
 	return nil
 }
 
-func translate(input string) (string, error) {
-	local := input
-
-	//Hide Strings
-	local, sArr := hideStrings(local)
-
-	//Delete multiline's
-	local = BLOCKCOMMENT.ReplaceAllString(local, "")
-
-	//Show Strings
-	local, err := showStrings(local, sArr)
-	if err != nil {return "", err}
-
-	return local, nil
-}
-
+//writes all strings to array and replaces them with a token
 func hideStrings(input string) (string, []string) {
 	local := input
 	sArr := make([]string, 0, 0)
@@ -104,6 +98,7 @@ func hideStrings(input string) (string, []string) {
 	return local, sArr
 }
 
+//replaces all string tokens with their original value from an array
 func showStrings(input string, sArr []string) (string, error) {
 	local := input
 	for {
@@ -112,5 +107,41 @@ func showStrings(input string, sArr []string) (string, error) {
 		if err != nil {return "", err}
 		local = RECLAIMSTRING.ReplaceAllString(local, "$1\""+sArr[id]+"\"$4")
 	}
+	return local, nil
+}
+
+//translates moonshine to moonscript (where the magic happens)
+func translate(input string) (string, error) {
+	local := input
+
+	//Hide Strings
+	local, sArr := hideStrings(local)
+
+	//Delete comments
+	local = BLOCKCOMMENT.ReplaceAllString(local, "")
+	local = COMMENT.ReplaceAllString(local, "\n")
+
+	//Change " is " to " == "
+	local = ISCONDITION.ReplaceAllString(local, " == ")
+
+	//Change " isnt " to " != "
+	local = ISNTCONDITION.ReplaceAllString(local, " != ")
+
+	//Change "::" to "\"
+	local = FUNCACCESSOR.ReplaceAllString(local, "\\")
+
+	//Existential accessor, must come before zero op
+	for {
+		if EXISACCESSOR.MatchString(local) == false {break}
+		local = EXISACCESSOR.ReplaceAllString(local, "($1 or {}).")
+	}
+
+	//Zero operator
+	local = ZEROOP.ReplaceAllString(local, "($1 != \"\" and $1 != 0)")
+
+	//Show Strings
+	local, err := showStrings(local, sArr)
+	if err != nil {return "", err}
+
 	return local, nil
 }

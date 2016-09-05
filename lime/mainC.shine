@@ -27,6 +27,21 @@ love.draw = ()->
    trace.draw!
    DrawWorld!
 
+
+player::Jump!
+if a isnt b
+  if b is c
+    if (b+c)? --zero operator
+      print d
+
+c = player?.b
+
 ---
-awdasdasd
+player\Jump!
+if a != b
+  if b == c
+    if ((b+c) != "" and (b+c) != 0)
+      print d
+
+c = (player or {}).b
 ---
