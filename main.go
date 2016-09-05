@@ -40,7 +40,7 @@ func main() {
 
 	//get the file/directory from the argument
 	if len(os.Args) < 2 {
-		fmt.Println("### Incorrect Usage: Didnt supply file or directory to compile. ###\n\n\t\tUsage: shine <file or directory>")
+		fmt.Println("### Incorrect Usage: Didnt supply file or directory to compile. ###\n\n\t\tUsage: MoonShine <file or directory>")
 		return
 	}
 	root := os.Args[1]
