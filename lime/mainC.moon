@@ -1,17 +1,17 @@
 --Setup Game
-require !STR!1!STR!
+require !STR!2!STR!
 game_setup!
 
 --Require Library
-require !STR!1!STR!
-require !STR!1!STR!
-require !STR!1!STR!
-require !STR!1!STR!
-require !STR!1!STR!
+require !STR!3!STR!
+require !STR!4!STR!
+require !STR!5!STR!
+require !STR!6!STR!
+require !STR!7!STR!
 
 --Dynamic requires
 ReqAll !STR!0!STR!
-ReqAll !STR!0!STR!
+ReqAll !STR!1!STR!
 
 --Load Event
 love.load = ()->

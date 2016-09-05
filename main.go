@@ -22,8 +22,8 @@ this works (kinda)
 
 //Compiler
 var FILETYPE = regexp.MustCompile("(\\.shine|\\.mshine)")
-var STRING1 = regexp.MustCompile("^(.*?)(\")(?:\\\\[\"]|[^\"])*(\")(.*)$")
-var STRING2 = regexp.MustCompile("^(.*?)(')(?:\\\\[']|[^'])*(')(.*)$")
+var STRING1 = regexp.MustCompile("^([\\s\\S]*?)(?:\")((?:\\\\[\"]|[^\"])*)(?:\")([\\s\\S]*)$")
+var STRING2 = regexp.MustCompile("^([\\s\\S]*?)(?:')((?:\\\\[']|[^'])*)(?:')([\\s\\S]*)$")
 
 //Moonshine
 var BLOCKCOMMENT = regexp.MustCompile("---((?:.|\\n)*)---")
@@ -47,7 +47,7 @@ func visit(path string, f os.FileInfo, err error) error {
 
 	if matched == true {
 		//Compile it then
-		fmt.Println("compiling", path + "...")
+		fmt.Println("Shining:", path + "...")
 		err := compile(path)
 		if err != nil {return err}
 		fmt.Println("done")
@@ -73,8 +73,8 @@ func translate(input string) string {
 	//Hide " strings
 	for {
 		if STRING1.MatchString(local) == false {break}
-		found := STRING1.FindString(local)
-		local = STRING1.ReplaceAllString(local, "!STR!" + strconv.Itoa(len(sArr)) + "!STR!")
+		found := STRING1.ReplaceAllString(local, "$2")
+		local = STRING1.ReplaceAllString(local, "$1!STR!" + strconv.Itoa(len(sArr)) + "!STR!$3")
 		fmt.Println(found)
 		sArr = append(sArr, found)
 	}
@@ -82,8 +82,8 @@ func translate(input string) string {
 	//Hide ' strings
 	for {
 		if STRING2.MatchString(local) == false {break}
-		found := STRING2.FindString(local)
-		local = STRING2.ReplaceAllString(local, "!STR!" + strconv.Itoa(len(sArr)) + "!STR!")
+		found := STRING2.ReplaceAllString(local, "$2")
+		local = STRING2.ReplaceAllString(local, "$1!STR!" + strconv.Itoa(len(sArr)) + "!STR!$3")
 		sArr = append(sArr, found)
 	}
 
