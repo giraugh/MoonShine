@@ -39,6 +39,10 @@ var EXISACCESSOR = regexp.MustCompile("([a-zA-Z_]+(?:[a-zA-Z0-9_.?]*))\\?\\.")
 func main() {
 
 	//get the file/directory from the argument
+	if len(os.Args) < 2 {
+		fmt.Println("### Incorrect Usage: Didnt supply file or directory to compile. ###\n\n\t\tUsage: shine <file or directory>")
+		return
+	}
 	root := os.Args[1]
 	err := filepath.Walk(root, visit)
 	if err != nil {
