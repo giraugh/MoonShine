@@ -75,11 +75,13 @@ func hideStrings(input string) (string, []string) {
 	isString := false
 	stringOpener := ""
 	hasEscape := false
+	hasInterp := false
+	last := ""
 	buf := ""
 	pbuf := ""
 	for _, c := range input {
 		char, _ := strconv.Unquote(strconv.QuoteRuneToASCII(c))
-    if char == "\"" || char == "'" {
+    if (char == "\"" || char == "'") && !hasInterp {
 			if (!hasEscape) {
 				//toggle whether we are recording string
 				if !isString {
@@ -104,15 +106,28 @@ func hideStrings(input string) (string, []string) {
 			if char == "\\" {
 				hasEscape = true
 			}
+			if char == "{" && last == "#" {
+				//set string interpolation
+				hasInterp = true
+			}
+
+			if char == "}" && hasInterp {
+				hasInterp = false
+			}
+
 			//if we are recording a string, do
 			if isString {
 				buf += char
 			}
 		}
 
+		//add to published buffer
 		if !isString {
 			pbuf += char
 		}
+
+		//record last char
+		last = char
 
 	}
 
@@ -126,7 +141,7 @@ func showStrings(input string, sArr []string) (string, error) {
 		if RECLAIMSTRING.MatchString(local) == false {break}
 		id, err := strconv.Atoi(RECLAIMSTRING.ReplaceAllString(local, "$3"))
 		if err != nil {return "", err}
-		local = RECLAIMSTRING.ReplaceAllString(local, "$1\020"+sArr[id]+"$4") //the $1 doesnt like to be next to a string, so we put the space char code in 
+		local = RECLAIMSTRING.ReplaceAllString(local, "$1\020"+sArr[id]+"$4") //the $1 doesnt like to be next to a string, so we put the space char code in
 	}
 	return local, nil
 }
