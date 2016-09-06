@@ -21,6 +21,15 @@ if 1 != 2
   print "*sigh*"
 
 if (myAwesomeVar != "" and myAwesomeVar != 0) 
-  print "myAwesomeVar is #{myAwesomeVar + '"'}" 
+  print "myAwesomeVar is #{myAwesomeVar + }" 
 
 (player or {}).position\addX 3 
+
+print 'i am a single quote string'
+
+
+if type(@) == "string"
+  @ = @\gsub "\n", "\\n"
+  if (string.match(@\gsub(@, "[^\"]", ""), '$')) 
+    return "#{@}"
+  return "#{@::gsub , \\}"

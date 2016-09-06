@@ -13,6 +13,7 @@ import (
 //Compiler
 var FILETYPE = regexp.MustCompile("(\\.shine|\\.mshine)")
 var RECLAIMSTRING = regexp.MustCompile("^([\\s\\S]*?)(!STR!([0-9]+)!STR!)([\\s\\S]*)$") //Has s/e anchors
+var ESCAPEDOLLARS = regexp.MustCompile("\\$")
 
 //Moonshine
 var COMMENT = regexp.MustCompile("--((?:[^\\n])*)\\n")
@@ -76,62 +77,61 @@ func hideStrings(input string) (string, []string) {
 	stringOpener := ""
 	hasEscape := false
 	hasInterp := false
-	last := ""
-	buf := ""
-	pbuf := ""
+	lastCh := ""
+	strBuff := ""
+	locBuff := ""
 	for _, c := range input {
 		char, _ := strconv.Unquote(strconv.QuoteRuneToASCII(c))
-    if (char == "\"" || char == "'") && !hasInterp {
-			if (!hasEscape) {
-				//toggle whether we are recording string
-				if !isString {
-					isString = true
-					stringOpener = char
-					buf = ""
-				} else {
-					if stringOpener == char {
-						isString = false
-						stringOpener = ""
-						pbuf += char
-						pbuf += "!STR!" + strconv.Itoa(len(sArr)) + "!STR!"
-						sArr = append(sArr, buf)
+    if isString {
+			//Switch when string opened
+			switch (char) {
+				case "{":
+					if lastCh == "#" {
+						hasInterp = true
 					}
-				}
-			} else {
-				hasEscape = false
-				buf += char
+					strBuff += char
+				case "}":
+					hasInterp = false
+					strBuff += char
+				case "\\": //escape symbol, toggle escaping
+					hasEscape = !hasEscape
+					strBuff += char
+				case "'", "\"": //close string
+					if (!hasEscape) && (!hasInterp) && stringOpener == char{
+						isString = false
+						if hasEscape {hasEscape = false}
+						locBuff += char + "!STR!" + strconv.Itoa(len(sArr)) + "!STR!" + char
+						sArr = append(sArr, strBuff)
+						strBuff = "" //reset string buffer
+					}
+					if (hasEscape) {
+						strBuff += char
+						if hasEscape {hasEscape = false}
+					}
+				default:
+					strBuff += char
+					if hasEscape {hasEscape = false}
 			}
+
 		} else {
-			//escape char?
-			if char == "\\" {
-				hasEscape = true
-			}
-			if char == "{" && last == "#" {
-				//set string interpolation
-				hasInterp = true
-			}
-
-			if char == "}" && hasInterp {
-				hasInterp = false
+			//Switch when string closed
+			switch (char) {
+				case "'", "\"": //open string
+					if !hasEscape {
+						isString = true
+						stringOpener = char
+					}
+				default: //add char to nonstring buffer
+					locBuff += char
 			}
 
-			//if we are recording a string, do
-			if isString {
-				buf += char
-			}
 		}
 
-		//add to published buffer
-		if !isString {
-			pbuf += char
-		}
-
-		//record last char
-		last = char
-
+		//record last character (for interpolation check)
+		lastCh = char
 	}
 
-	return pbuf, sArr
+	return locBuff, sArr
 }
 
 //replaces all string tokens with their original value from an array
@@ -141,7 +141,8 @@ func showStrings(input string, sArr []string) (string, error) {
 		if RECLAIMSTRING.MatchString(local) == false {break}
 		id, err := strconv.Atoi(RECLAIMSTRING.ReplaceAllString(local, "$3"))
 		if err != nil {return "", err}
-		local = RECLAIMSTRING.ReplaceAllString(local, "$1\020"+sArr[id]+"$4") //the $1 doesnt like to be next to a string, so we put the space char code in
+		get := "$1\020" + ESCAPEDOLLARS.ReplaceAllString(sArr[id],"$\020") + "$4"
+		local = RECLAIMSTRING.ReplaceAllString(local, get) //the $1 doesnt like to be next to a string, so we put the space char code in
 	}
 	return local, nil
 }

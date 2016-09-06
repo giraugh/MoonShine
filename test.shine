@@ -26,7 +26,16 @@ if 1 is 1 --should compile to "1 == 1"
 if 1 isnt 2 --Should compile to "1 != 2"
   print "*sigh*"
 
-if myAwesomeVar? --Should compile to    myAwesomeVar != "" and myAwesomeVar != 0
+if myAwesomeVar? --Should compile to    (myAwesomeVar != "" and myAwesomeVar != 0)
   print "myAwesomeVar is #{myAwesomeVar + '"'}" --this can create a weird (specific) edge case
 
 player?.position::addX 3 --Should compile to    (player or {}).position\addX 3
+
+print 'i am a single quote string'
+
+--Excerpt from lime (known to not play nice)
+if type(@) is "string"
+  @ = @::gsub "\n", "\\n"
+  if (string.match(@::gsub(@, "[^'\"]", ""), '$')) --'^+$'
+    return "'#{@}'"
+  return "'#{@::gsub '"', '\\"'}'"
