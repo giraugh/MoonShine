@@ -12,8 +12,6 @@ import (
 
 //Compiler
 var FILETYPE = regexp.MustCompile("(\\.shine|\\.mshine)")
-var STRING1 = regexp.MustCompile("^([\\s\\S]*?[^\\\\])(?:\")((?:\\\\[\"]|[^\"])*)(?:\")([\\s\\S]*)$") //Has s/e anchors
-var STRING2 = regexp.MustCompile("^([\\s\\S]*?[^\\\\])(?:')((?:\\\\[']|[^'])*)(?:')([\\s\\S]*)$") //Has s/e anchors
 var RECLAIMSTRING = regexp.MustCompile("^([\\s\\S]*?)(!STR!([0-9]+)!STR!)([\\s\\S]*)$") //Has s/e anchors
 
 //Moonshine
@@ -72,24 +70,53 @@ func compile(path string) error {
 
 //writes all strings to array and replaces them with a token
 func hideStrings(input string) (string, []string) {
-	local := input
 	sArr := make([]string, 0, 0)
-	//Hide " strings
-	for {
-		if STRING1.MatchString(local) == false {break}
-		found := STRING1.ReplaceAllString(local, "$2")
-		local = STRING1.ReplaceAllString(local, "$1!STR!" + strconv.Itoa(len(sArr)) + "!STR!$3")
-		sArr = append(sArr, found)
+
+	isString := false
+	stringOpener := ""
+	hasEscape := false
+	buf := ""
+	pbuf := ""
+	for _, c := range input {
+		char, _ := strconv.Unquote(strconv.QuoteRuneToASCII(c))
+    if char == "\"" || char == "'" {
+			if (!hasEscape) {
+				//toggle whether we are recording string
+				if !isString {
+					isString = true
+					stringOpener = char
+					buf = ""
+				} else {
+					if stringOpener == char {
+						isString = false
+						stringOpener = ""
+						pbuf += char
+						pbuf += "!STR!" + strconv.Itoa(len(sArr)) + "!STR!"
+						sArr = append(sArr, buf)
+					}
+				}
+			} else {
+				hasEscape = false
+				buf += char
+			}
+		} else {
+			//escape char?
+			if char == "\\" {
+				hasEscape = true
+			}
+			//if we are recording a string, do
+			if isString {
+				buf += char
+			}
+		}
+
+		if !isString {
+			pbuf += char
+		}
+
 	}
 
-	//Hide ' strings
-	for {
-		if STRING2.MatchString(local) == false {break}
-		found := STRING2.ReplaceAllString(local, "$2")
-		local = STRING2.ReplaceAllString(local, "$1!STR!" + strconv.Itoa(len(sArr)) + "!STR!$3")
-		sArr = append(sArr, found)
-	}
-	return local, sArr
+	return pbuf, sArr
 }
 
 //replaces all string tokens with their original value from an array
@@ -99,7 +126,7 @@ func showStrings(input string, sArr []string) (string, error) {
 		if RECLAIMSTRING.MatchString(local) == false {break}
 		id, err := strconv.Atoi(RECLAIMSTRING.ReplaceAllString(local, "$3"))
 		if err != nil {return "", err}
-		local = RECLAIMSTRING.ReplaceAllString(local, "$1\""+sArr[id]+"\"$4")
+		local = RECLAIMSTRING.ReplaceAllString(local, "$1\020"+sArr[id]+"$4") //the $1 doesnt like to be next to a string, so we put the space char code in 
 	}
 	return local, nil
 }
