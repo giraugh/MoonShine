@@ -1,0 +1,32 @@
+---
+Compiler test file
+
+This should be deleted, this too!
+
+and this!
+---
+
+--And this!
+
+--And this also!
+
+print "hello" ---and me, im special--- , "world"
+
+a = "hello world \n \'put in apostrophes\' here is an escaped quote: \" and here is an escaped single-quote: \'"
+b = 'hello world \n \"put in quotes\" here is an escaped quote: \" and here is an escaped single-quote: \''
+
+print "this shouldnt be compiled AT ALL: :: is isnt a?"
+
+player::jump! --Should compile to 'Player\jump!'
+player::move fast --Should compile to Player\move fast
+
+if 1 is 1 --should compile to "1 == 1"
+  print "obvious much?"
+
+if 1 isnt 2 --Should compile to "1 != 2"
+  print "*sigh*"
+
+if myAwesomeVar? --Should compile to    myAwesomeVar != "" and myAwesomeVar != 0
+  print "myAwesomeVar is #{myAwesomeVar}"
+
+player?.position::addX 3 --Should compile to    (player or {}).position\addX 3

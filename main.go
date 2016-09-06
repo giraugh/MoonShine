@@ -10,25 +10,15 @@ import (
 	"strconv"
 )
 
-/*
-is - ==
-isnt - !=
-:: - \
-? - zero operator, works like truthiness in js/coffee
-?. - existential accessor like in coffee
-
-*/
-
-
 //Compiler
 var FILETYPE = regexp.MustCompile("(\\.shine|\\.mshine)")
-var STRING1 = regexp.MustCompile("^([\\s\\S]*?)(?:\")((?:\\\\[\"]|[^\"])*)(?:\")([\\s\\S]*)$") //Has s/e anchors
-var STRING2 = regexp.MustCompile("^([\\s\\S]*?)(?:')((?:\\\\[']|[^'])*)(?:')([\\s\\S]*)$") //Has s/e anchors
+var STRING1 = regexp.MustCompile("^([\\s\\S]*?[^\\\\])(?:\")((?:\\\\[\"]|[^\"])*)(?:\")([\\s\\S]*)$") //Has s/e anchors
+var STRING2 = regexp.MustCompile("^([\\s\\S]*?[^\\\\])(?:')((?:\\\\[']|[^'])*)(?:')([\\s\\S]*)$") //Has s/e anchors
 var RECLAIMSTRING = regexp.MustCompile("^([\\s\\S]*?)(!STR!([0-9]+)!STR!)([\\s\\S]*)$") //Has s/e anchors
 
 //Moonshine
 var COMMENT = regexp.MustCompile("--((?:[^\\n])*)\\n")
-var BLOCKCOMMENT = regexp.MustCompile("---((?:.|\\n)*)---")
+var BLOCKCOMMENT = regexp.MustCompile("---((?:.|\\n)*?)---")
 var ISCONDITION = regexp.MustCompile("\\sis\\s")
 var ISNTCONDITION = regexp.MustCompile("\\sisnt\\s")
 var FUNCACCESSOR = regexp.MustCompile("::")
@@ -118,12 +108,12 @@ func showStrings(input string, sArr []string) (string, error) {
 func translate(input string) (string, error) {
 	local := input
 
-	//Hide Strings
-	local, sArr := hideStrings(local)
-
 	//Delete comments
 	local = BLOCKCOMMENT.ReplaceAllString(local, "")
 	local = COMMENT.ReplaceAllString(local, "\n")
+
+	//Hide Strings
+	local, sArr := hideStrings(local)
 
 	//Change " is " to " == "
 	local = ISCONDITION.ReplaceAllString(local, " == ")
