@@ -24,6 +24,8 @@ var ISNTCONDITION = regexp.MustCompile("\\sisnt\\s")
 var FUNCACCESSOR = regexp.MustCompile("::")
 var ZEROOP = regexp.MustCompile("((?:[a-zA-Z_]+(?:[a-zA-Z0-9_]*))|(?:\\([^)(\\n]+\\)))\\?")
 var EXISACCESSOR = regexp.MustCompile("([a-zA-Z_]+(?:[a-zA-Z0-9_.?]*))\\?\\.")
+var INCACCESSOR = regexp.MustCompile("([^\\s\\n]*)\\[(.*)##(.*)\\]")
+var PINCACCESSOR = regexp.MustCompile("([^\\s\\n]*)\\[\\+\\]")
 
 //Get args and walk filepath
 func main() {
@@ -107,7 +109,7 @@ func hideStrings(input string) (string, []string) {
 					} else {
 						strBuff += char
 					}
-					
+
 					if (hasEscape) {
 						if hasEscape {hasEscape = false}
 					}
@@ -171,6 +173,14 @@ func translate(input string) (string, error) {
 
 	//Change "::" to "\"
 	local = FUNCACCESSOR.ReplaceAllString(local, "\\")
+
+	//Change a[.##.] to a[.#a.]
+	local = INCACCESSOR.ReplaceAllString(local, "$1\020[$2\020#$1\020$3\020]")
+	local = REPLACE020.ReplaceAllString(local, "")
+
+	//Change a[+] to a[#a+1]
+	local = PINCACCESSOR.ReplaceAllString(local, "$1\020[#$1\020+1]")
+	local = REPLACE020.ReplaceAllString(local, "")
 
 	//Existential accessor, must come before zero op
 	for {
