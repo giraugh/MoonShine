@@ -14,6 +14,7 @@ import (
 var FILETYPE = regexp.MustCompile("(\\.shine|\\.mshine)")
 var RECLAIMSTRING = regexp.MustCompile("^([\\s\\S]*?)(!STR!([0-9]+)!STR!)([\\s\\S]*)$") //Has s/e anchors
 var ESCAPEDOLLARS = regexp.MustCompile("\\$")
+var REPLACE020 = regexp.MustCompile("\020")
 
 //Moonshine
 var COMMENT = regexp.MustCompile("--((?:[^\\n])*)\\n")
@@ -49,10 +50,10 @@ func visit(path string, f os.FileInfo, err error) error {
 
 	if matched == true {
 		//Compile it then
-		fmt.Println("Shining:", path + "...")
+		fmt.Print("Shining: ", path + "")
 		err := compile(path)
 		if err != nil {return err}
-		fmt.Println("done")
+		fmt.Print(" DONE \n")
 	}
 	return nil
 }
@@ -143,6 +144,7 @@ func showStrings(input string, sArr []string) (string, error) {
 		if err != nil {return "", err}
 		get := "$1\020" + ESCAPEDOLLARS.ReplaceAllString(sArr[id],"$\020") + "$4"
 		local = RECLAIMSTRING.ReplaceAllString(local, get) //the $1 doesnt like to be next to a string, so we put the space char code in
+		local = REPLACE020.ReplaceAllString(local, "")
 	}
 	return local, nil
 }
