@@ -104,11 +104,14 @@ func hideStrings(input string) (string, []string) {
 						locBuff += char + "!STR!" + strconv.Itoa(len(sArr)) + "!STR!" + char
 						sArr = append(sArr, strBuff)
 						strBuff = "" //reset string buffer
-					}
-					if (hasEscape) {
+					} else {
 						strBuff += char
+					}
+					
+					if (hasEscape) {
 						if hasEscape {hasEscape = false}
 					}
+
 				default:
 					strBuff += char
 					if hasEscape {hasEscape = false}

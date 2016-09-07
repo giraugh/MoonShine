@@ -12,8 +12,8 @@ and this!
 
 print "hello"---and me, im special---, "world"
 
-a = "hello world \n \'put in apostrophes\' here is an escaped quote: \" and here is an escaped single-quote: \'"
-b = 'hello world \n \"put in quotes\" here is an escaped quote: \" and here is an escaped single-quote: \''
+a = "hello world \n 'put in apostrophes' here is an escaped quote: \" and here is an escaped single-quote: \'"
+b = 'hello world \n "put in quotes" here is an escaped quote: \" and here is an escaped single-quote: \''
 
 print "this shouldnt be compiled AT ALL: :: is isnt a?"
 
