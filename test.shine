@@ -42,15 +42,15 @@ myArr[+] = 1 --simplified hash accessors
 
 --some tests for whitespace
 vex()
-::test()
-::ha()
+  ::test()
+    ::find()
 ---should become
-vex()\test()\ha()
+vex()\test()\find()
 ---
 
 player
-.hello
-.there
+  .hello
+    .there
 ---should become
 player.hello.there
 ---

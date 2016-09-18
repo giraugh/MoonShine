@@ -35,7 +35,7 @@ myArr[#myArr+1] = 1
 @myArr[#@myArr+1] = 3
 
 
-vex()\test()\ha()
+vex()\test()\find()
 
 
 player.hello.there

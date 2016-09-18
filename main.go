@@ -26,7 +26,7 @@ var ZEROOP = regexp.MustCompile("((?:[a-zA-Z_]+(?:[a-zA-Z0-9_]*))|(?:\\([^)(\\n]
 var EXISACCESSOR = regexp.MustCompile("([a-zA-Z_]+(?:[a-zA-Z0-9_.?]*))\\?\\.")
 var INCACCESSOR = regexp.MustCompile("([^\\s\\n]*)\\[(.*)##(.*)\\]")
 var PINCACCESSOR = regexp.MustCompile("([^\\s\\n]*)\\[\\+\\]")
-var WHITESPACEREMOVE = regexp.MustCompile("(?m)(?:\\n|\\r)+(::|\\.|\\\\)")
+var WHITESPACEREMOVE = regexp.MustCompile("(?m)(?:\\n|\\r)+(?: |\\t)*(::|\\.|\\\\)")
 
 //Get args and walk filepath
 func main() {
