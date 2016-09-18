@@ -35,9 +35,8 @@ myArr[#myArr+1] = 1
 @myArr[#@myArr+1] = 3
 
 
+vex()\test()\ha()
 
-if type(@) == "string"
-  @ = @\gsub "\n", "\\n"
-  if (string.match(@\gsub(@, "[^'\"]", ""), '$')) 
-    return "'#{@}'"
-  return "'#{@\gsub '"', '\\"'}'" 
+
+player.hello.there
+

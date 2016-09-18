@@ -40,10 +40,17 @@ a.myArr[##+1] = 4
 myArr[+] = 1 --simplified hash accessors
 @myArr[+] = 3
 
+--some tests for whitespace
+vex()
+::test()
+::ha()
+---should become
+vex()\test()\ha()
+---
 
---Excerpt from lime (known to not play nice)
-if type(@) is "string"
-  @ = @::gsub "\n", "\\n"
-  if (string.match(@::gsub(@, "[^'\"]", ""), '$')) --'^+$'
-    return "'#{@}'"
-  return "'#{@\gsub '"', '\\"'}'" --its a point to make that only MOONSCRIPT is supported in interpolation
+player
+.hello
+.there
+---should become
+player.hello.there
+---
