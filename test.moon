@@ -35,6 +35,10 @@ myArr[#myArr+1] = 1
 @myArr[#@myArr+1] = 3
 
 
+x+=1 
+player.x+=1 
+
+
 vex()\test()\find()
 
 

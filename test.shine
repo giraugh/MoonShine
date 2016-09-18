@@ -40,6 +40,10 @@ a.myArr[##+1] = 4
 myArr[+] = 1 --simplified hash accessors
 @myArr[+] = 3
 
+--the ++ operator
+x++ --x += 1
+player.x++ --player.x += 1
+
 --some tests for whitespace
 vex()
   ::test()

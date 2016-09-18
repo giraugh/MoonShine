@@ -27,6 +27,7 @@ var EXISACCESSOR = regexp.MustCompile("([a-zA-Z_]+(?:[a-zA-Z0-9_.?]*))\\?\\.")
 var INCACCESSOR = regexp.MustCompile("([^\\s\\n]*)\\[(.*)##(.*)\\]")
 var PINCACCESSOR = regexp.MustCompile("([^\\s\\n]*)\\[\\+\\]")
 var WHITESPACEREMOVE = regexp.MustCompile("(?m)(?:\\n|\\r)+(?: |\\t)*(::|\\.|\\\\)")
+var INCREMENTOPERATOR = regexp.MustCompile("\\+\\+")
 
 //Get args and walk filepath
 func main() {
@@ -186,6 +187,9 @@ func translate(input string) (string, error) {
 	//Change a[+] to a[#a+1]
 	local = PINCACCESSOR.ReplaceAllString(local, "$1\020[#$1\020+1]")
 	local = REPLACE020.ReplaceAllString(local, "")
+
+	//Change ++ to += 1
+	local = INCREMENTOPERATOR.ReplaceAllString(local, "+=1")
 
 	//Existential accessor, must come before zero op
 	for {
