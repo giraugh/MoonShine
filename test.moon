@@ -44,3 +44,7 @@ vex()\test()\find()
 
 player.hello.there
 
+
+
+print "hello"
+print "World"

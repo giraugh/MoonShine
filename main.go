@@ -28,6 +28,7 @@ var INCACCESSOR = regexp.MustCompile("([^\\s\\n]*)\\[(.*)##(.*)\\]")
 var PINCACCESSOR = regexp.MustCompile("([^\\s\\n]*)\\[\\+\\]")
 var WHITESPACEREMOVE = regexp.MustCompile("(?m)(?:\\n|\\r)+(?: |\\t)*(::|\\.|\\\\)")
 var INCREMENTOPERATOR = regexp.MustCompile("\\+\\+")
+var DOUBLESTATEMENTOP = regexp.MustCompile("\\s&&\\s")
 
 //Get args and walk filepath
 func main() {
@@ -170,6 +171,9 @@ func translate(input string) (string, error) {
 	//Remove breaking whitespace
 	local = WHITESPACEREMOVE.ReplaceAllString(local, "$1\020$2\020")
 	local = REPLACE020.ReplaceAllString(local, "")
+
+	//Change && to \n
+	local = DOUBLESTATEMENTOP.ReplaceAllString(local, "\n")
 
 	//Change " is " to " == "
 	local = ISCONDITION.ReplaceAllString(local, " == ")

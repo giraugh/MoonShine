@@ -58,3 +58,6 @@ player
 ---should become
 player.hello.there
 ---
+
+--putting two statements on one line
+print "hello" && print "World"
