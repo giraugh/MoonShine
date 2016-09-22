@@ -61,3 +61,9 @@ player.hello.there
 
 --putting two statements on one line
 print "hello" && print "World"
+
+--putting two statements on one line with tabs
+if world
+  print "hello" && print "world"
+else
+  print "hello"

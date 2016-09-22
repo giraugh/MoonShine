@@ -48,3 +48,10 @@ player.hello.there
 
 print "hello"
 print "World"
+
+
+if world
+  print "hello"
+  print "world"
+else
+  print "hello"
