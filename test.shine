@@ -60,3 +60,9 @@ if world
   print "hello" && print "world"
 else
   print "hello"
+
+--set key to what, <> will be replaced by what
+>>what
+print "say <>?"
+<< --release key
+print "saw <>?" --should use key

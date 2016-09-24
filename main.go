@@ -30,6 +30,11 @@ var WHITESPACEREMOVE = regexp.MustCompile("(?m)(?:\\n|\\r)+(?: |\\t)*(::|\\\\)")
 var INCREMENTOPERATOR = regexp.MustCompile("\\+\\+")
 var DOUBLESTATEMENTOP = regexp.MustCompile("([\t ]*)(.*)\\s&&\\s")
 
+var KEY = regexp.MustCompile("(?:><)|(?:<>)")
+var SETKEY = regexp.MustCompile(">>\\s?([\\s\\S]*)")
+var RELEASEKEY = regexp.MustCompile("<<")
+
+
 //Get args and walk filepath
 func main() {
 
@@ -157,6 +162,47 @@ func showStrings(input string, sArr []string) (string, error) {
 	return local, nil
 }
 
+func keys(input string) (string, error) {
+
+	local := ""
+	buffer := ""
+	lines := make([]string, 0, 0)
+	for _, c := range input {
+		char, err := strconv.Unquote(strconv.QuoteRuneToASCII(c))
+		if err != nil {return "", err}
+		if char == "\n" || char == "\r" {
+			lines = append(lines, buffer)
+			buffer = ""
+		}
+		buffer += char
+	}
+
+	key := ""
+	for i := 0; i < len(lines); i++ {
+		line := lines[i]
+		//replace keys
+		if KEY.MatchString(line) {
+			if key != "" {
+				lines[i] = KEY.ReplaceAllString(line, key)
+			}
+		}
+		//store key
+		if SETKEY.MatchString(line) {
+			key = SETKEY.ReplaceAllString(line, "$1")
+			key = key[1:] //remove newline at start
+			lines[i] = ""
+		}
+		//unset key
+		if RELEASEKEY.MatchString(line) {
+			key = ""
+			lines[i] = ""
+		}
+	}
+
+	local = strings.Join(lines[:],"")
+	return local, nil
+}
+
 //translates moonshine to moonscript (where the magic happens)
 func translate(input string) (string, error) {
 	local := input
@@ -207,6 +253,10 @@ func translate(input string) (string, error) {
 
 	//Show Strings
 	local, err := showStrings(local, sArr)
+	if err != nil {return "", err}
+
+	//use keys
+	local, err = keys(local)
 	if err != nil {return "", err}
 
 	return local, nil

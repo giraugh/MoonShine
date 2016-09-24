@@ -42,9 +42,6 @@ player.x+=1
 vex()\test()\find()
 
 
-player.hello.there
-
-
 
 print "hello"
 print "World"
@@ -55,3 +52,7 @@ if world
   print "world"
 else
   print "hello"
+
+
+print "say what?"
+print "saw <>?" 
